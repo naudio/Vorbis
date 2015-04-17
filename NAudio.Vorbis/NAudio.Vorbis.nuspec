@@ -13,7 +13,7 @@
         <summary>NAudio support for Vorbis</summary>
         <releaseNotes>- Initial Release under NAudio</releaseNotes>
         <language>en-US</language>
-        <tags>audio c# .NET sound vorbis NAudio</tags>
+        <tags>audio c# .NET sound vorbis NAudio NVorbis</tags>
         <dependencies>
             <dependency id="NAudio" version="1.5" />
             <dependency id="NVorbis" version="0.8.4" />
@@ -23,9 +23,9 @@
         </frameworkAssemblies>
     </metadata>
     <files>
-        <file src="bin\NVorbis.NAudioSupport.dll" target="lib" />
-        <file src="bin\NVorbis.NAudioSupport.xml" target="lib" />
-        <file src="LICENSE" />
-        <file src="README.md" />
+        <file src="..\bin\NAudio.Vorbis.dll" target="lib" />
+        <file src="..\bin\NAudio.Vorbis.xml" target="lib" />
+        <file src="..\LICENSE" />
+        <file src="..\README.md" />
     </files>
 </package>
