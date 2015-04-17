@@ -6,8 +6,8 @@
         <title />
         <authors>Andrew Ward</authors>
         <owners />
-        <licenseUrl>http://github.com/NAudio/NAudio.Vorbis/LICENSE</licenseUrl>
-        <projectUrl>http://github.com/NAudio/NAudio.Vorbis/</projectUrl>
+        <licenseUrl>http://github.com/NAudio/Vorbis/LICENSE</licenseUrl>
+        <projectUrl>http://github.com/NAudio/Vorbis/</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>NAudio support for Vorbis</description>
         <summary>NAudio support for Vorbis</summary>
