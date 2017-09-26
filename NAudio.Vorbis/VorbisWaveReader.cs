@@ -51,20 +51,20 @@ namespace NAudio.Vorbis
 
         public override long Length
         {
-            get { return (long)(_reader.TotalTime.TotalSeconds * _waveFormat.SampleRate * _waveFormat.Channels * sizeof(float)); }
+            get { return _reader.TotalSamples * _waveFormat.BlockAlign; }
         }
 
         public override long Position
         {
             get
             {
-                return (long)(_reader.DecodedTime.TotalSeconds * _reader.SampleRate * _reader.Channels * sizeof(float));
+                return _reader.DecodedPosition * _waveFormat.BlockAlign;
             }
             set
             {
                 if (value < 0 || value > Length) throw new ArgumentOutOfRangeException("value");
 
-                _reader.DecodedTime = TimeSpan.FromSeconds((double)value / _reader.SampleRate / _reader.Channels / sizeof(float));
+                _reader.DecodedPosition = value / _waveFormat.BlockAlign;
             }
         }
 
