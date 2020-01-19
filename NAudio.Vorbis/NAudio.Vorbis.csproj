@@ -16,7 +16,8 @@
     <PackageTags>audio c# .NET sound vorbis NAudio NVorbis</PackageTags>
     <PackageReleaseNotes>- Update to use .Net Framework v4.5
 - Update to use NAudio v1.9.0
-- Update to use NVorbis v0.9.1</PackageReleaseNotes>
+- Update to use NVorbis v0.9.1
+- Add .Net Standard v2.0 support</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
