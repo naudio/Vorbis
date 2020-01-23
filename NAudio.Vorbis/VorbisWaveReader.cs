@@ -1,70 +1,48 @@
-﻿/****************************************************************************
- * NVorbis                                                                  *
- * Copyright (C) 2012, Andrew Ward <afward@gmail.com>                       *
- *                                                                          *
- * See COPYING for license terms (Ms-PL).                                   *
- *                                                                          *
- ***************************************************************************/
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
 
 namespace NAudio.Vorbis
 {
-    // TODO: figure out how to handle concatenated streams!
-
-    public class VorbisWaveReader : NAudio.Wave.WaveStream, IDisposable, NAudio.Wave.ISampleProvider, NAudio.Wave.IWaveProvider
+    public class VorbisWaveReader : Wave.WaveStream, Wave.ISampleProvider
     {
-        NVorbis.VorbisReader _reader;
-        NAudio.Wave.WaveFormat _waveFormat;
+        VorbisSampleProvider _sampleProvider;
 
         public VorbisWaveReader(string fileName)
+            : this(System.IO.File.OpenRead(fileName), true)
         {
-            _reader = new NVorbis.VorbisReader(fileName);
-
-            _waveFormat = NAudio.Wave.WaveFormat.CreateIeeeFloatWaveFormat(_reader.SampleRate, _reader.Channels);
         }
 
-        public VorbisWaveReader(System.IO.Stream sourceStream)
+        public VorbisWaveReader(System.IO.Stream sourceStream, bool closeOnDispose = false)
         {
-            _reader = new NVorbis.VorbisReader(sourceStream, false);
-
-            _waveFormat = NAudio.Wave.WaveFormat.CreateIeeeFloatWaveFormat(_reader.SampleRate, _reader.Channels);
+            // To maintain consistent semantics with v1.1, we don't expose the events and auto-advance / stream removal features of VorbisSampleProvider.
+            // If one wishes to use those features, they should really use VorbisSampleProvider directly...
+            _sampleProvider = new VorbisSampleProvider(sourceStream, closeOnDispose);
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && _reader != null)
+            if (disposing)
             {
-                _reader.Dispose();
-                _reader = null;
+                _sampleProvider?.Dispose();
+                _sampleProvider = null;
             }
             
             base.Dispose(disposing);
         }
 
-        public override NAudio.Wave.WaveFormat WaveFormat
-        {
-            get { return _waveFormat; }
-        }
+        public override Wave.WaveFormat WaveFormat => _sampleProvider.WaveFormat;
 
-        public override long Length
-        {
-            get { return _reader.TotalSamples * _waveFormat.BlockAlign; }
-        }
+        public override long Length => _sampleProvider.Length * _sampleProvider.WaveFormat.BlockAlign;
 
         public override long Position
         {
-            get
-            {
-                return _reader.DecodedPosition * _waveFormat.BlockAlign;
-            }
+            get => _sampleProvider.SamplePosition * _sampleProvider.WaveFormat.BlockAlign;
             set
             {
-                if (value < 0 || value > Length) throw new ArgumentOutOfRangeException("value");
+                if (!_sampleProvider.CanSeek) throw new InvalidOperationException("Cannot seek!");
+                if (value < 0 || value > Length) throw new ArgumentOutOfRangeException(nameof(value));
 
-                _reader.DecodedPosition = value / _waveFormat.BlockAlign;
+                _sampleProvider.Seek(value / _sampleProvider.WaveFormat.BlockAlign);
             }
         }
 
@@ -78,7 +56,7 @@ namespace NAudio.Vorbis
             count /= sizeof(float);
 
             // make sure we don't have an odd count
-            count -= count % _reader.Channels;
+            count -= count % _sampleProvider.WaveFormat.Channels;
 
             // get the buffer, creating a new one if none exists or the existing one is too small
             var cb = _conversionBuffer ?? (_conversionBuffer = new float[count]);
@@ -99,20 +77,18 @@ namespace NAudio.Vorbis
 
         public int Read(float[] buffer, int offset, int count)
         {
-            return _reader.ReadSamples(buffer, offset, count);
+            if (IsParameterChange) throw new InvalidOperationException("A parameter change is pending.  Call ClearParameterChange() to clear it.");
+
+            return _sampleProvider.Read(buffer, offset, count);
         }
 
-        public bool IsParameterChange { get { return _reader.IsParameterChange; } }
+        [Obsolete("Was never used and will be removed.")]
+        public bool IsParameterChange => false;
 
-        public void ClearParameterChange()
-        {
-            _reader.ClearParameterChange();
-        }
+        [Obsolete("Was never used and will be removed.")]
+        public void ClearParameterChange() { }
 
-        public int StreamCount
-        {
-            get { return _reader.StreamCount; }
-        }
+        public int StreamCount => _sampleProvider.StreamCount;
 
         public int? NextStreamIndex { get; set; }
 
@@ -120,66 +96,57 @@ namespace NAudio.Vorbis
         {
             if (!NextStreamIndex.HasValue)
             {
-                var idx = _reader.StreamCount;
-                if (_reader.FindNextStream())
-                {
-                    NextStreamIndex = idx;
-                    return true;
-                }
+                NextStreamIndex = _sampleProvider.GetNextStreamIndex();
+                return NextStreamIndex.HasValue;
             }
             return false;
         }
 
         public int CurrentStream
         {
-            get { return _reader.StreamIndex; }
+            get => _sampleProvider.GetCurrentStreamIndex();
             set
             {
-                if (!_reader.SwitchStreams(value))
-                {
-                    throw new System.IO.InvalidDataException("The selected stream is not a valid Vorbis stream!");
-                }
+                _sampleProvider.SwitchStreams(value);
 
-                if (NextStreamIndex.HasValue && value == NextStreamIndex.Value)
-                {
-                    NextStreamIndex = null;
-                }
+                NextStreamIndex = null;
             }
         }
 
         /// <summary>
         /// Gets the encoder's upper bitrate of the current selected Vorbis stream
         /// </summary>
-        public int UpperBitrate { get { return _reader.UpperBitrate; } }
+        public int UpperBitrate => _sampleProvider.UpperBitrate;
 
         /// <summary>
         /// Gets the encoder's nominal bitrate of the current selected Vorbis stream
         /// </summary>
-        public int NominalBitrate { get { return _reader.NominalBitrate; } }
+        public int NominalBitrate => _sampleProvider.NominalBitrate;
 
         /// <summary>
         /// Gets the encoder's lower bitrate of the current selected Vorbis stream
         /// </summary>
-        public int LowerBitrate { get { return _reader.LowerBitrate; } }
+        public int LowerBitrate => _sampleProvider.LowerBitrate;
 
         /// <summary>
         /// Gets the encoder's vendor string for the current selected Vorbis stream
         /// </summary>
-        public string Vendor { get { return _reader.Vendor; } }
+        public string Vendor => _sampleProvider.Tags.EncoderVendor;
 
         /// <summary>
         /// Gets the comments in the current selected Vorbis stream
         /// </summary>
-        public string[] Comments { get { return _reader.Comments; } }
+        public string[] Comments => _sampleProvider.Tags.All.SelectMany(k => k.Value, (kvp, Item) => $"{kvp.Key}={Item}").ToArray();
 
         /// <summary>
         /// Gets the number of bits read that are related to framing and transport alone
         /// </summary>
-        public long ContainerOverheadBits { get { return _reader.ContainerOverheadBits; } }
+        [Obsolete("No longer supported.", true)]
+        public long ContainerOverheadBits => throw new NotSupportedException();
 
         /// <summary>
         /// Gets stats from each decoder stream available
         /// </summary>
-        public NVorbis.IVorbisStreamStatus[] Stats { get { return _reader.Stats; } }
+        public NVorbis.Contracts.IStreamStats[] Stats => new[] { _sampleProvider.Stats };
     }
 }

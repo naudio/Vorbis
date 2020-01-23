@@ -4,7 +4,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <RootNamespace>NAudio.Vorbis</RootNamespace>
-    <Version>1.1.0</Version>
+    <Version>1.2.0-alpha</Version>
     <Authors>Andrew Ward</Authors>
     <Company>Andrew Ward</Company>
     <Description>NAudio support for Vorbis</Description>
@@ -14,10 +14,9 @@
     <RepositoryUrl>https://github.com/naudio/Vorbis</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>audio c# .NET sound vorbis NAudio NVorbis</PackageTags>
-    <PackageReleaseNotes>- Update to use .Net Framework v4.5
-- Update to use NAudio v1.9.0
-- Update to use NVorbis v0.9.1
-- Add .Net Standard v2.0 support</PackageReleaseNotes>
+    <PackageReleaseNotes>- Update to NVorbis 0.10.0
+- Added VorbisSampleProvider for more capable ISampleProvider support
+- Updated VorbisWaveReader to use VorbisSampleProvider</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
@@ -36,7 +35,7 @@
 
   <ItemGroup>
     <PackageReference Include="NAudio" Version="1.9.0" />
-    <PackageReference Include="NVorbis" Version="0.9.1" />
+    <PackageReference Include="NVorbis" Version="0.10.0-alpha" />
   </ItemGroup>
 
 </Project>
