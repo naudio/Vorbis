@@ -116,13 +116,9 @@ namespace NAudio.Vorbis
             }
 
             // if we don't have any valid decoders, try to find a new stream
-            while (node == null && (_containerReader?.FindNextStream() ?? false))
+            if (node == null && FindNextStream())
             {
                 node = _streamDecoders.Last;
-                if (node.Value.IsEndOfStream)
-                {
-                    node = null;
-                }
             }
 
             // switch to the new decoder, if one was found
@@ -163,7 +159,7 @@ namespace NAudio.Vorbis
             var count = -1;
             while (++count < index)
             {
-                if (node.Next == null && !_containerReader.FindNextStream())
+                if (node.Next == null && !FindNextStream())
                 {
                     throw new ArgumentOutOfRangeException(nameof(index));
                 }
@@ -355,6 +351,22 @@ namespace NAudio.Vorbis
             while (_containerReader.FindNextStream())
             {
             }
+        }
+
+        /// <summary>
+        /// Finds the next available stream in the container.
+        /// </summary>
+        /// <returns><see langword="true"/> if another Vorbis stream was found, otherwise <see langword="false"/>.</returns>
+        public bool FindNextStream()
+        {
+            if (_containerReader?.CanSeek ?? false)
+            {
+                var lastStream = _streamDecoders.Last.Value;
+                while (_containerReader.FindNextStream() && lastStream == _streamDecoders.Last.Value)
+                {
+                }
+            }
+            return false;
         }
 
         /// <summary>
