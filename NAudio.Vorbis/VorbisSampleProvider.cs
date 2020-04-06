@@ -101,11 +101,20 @@ namespace NAudio.Vorbis
 
         private bool? GetNextDecoder(bool keepOldDecoder)
         {
-            // find the next viable node to switch to
-            var node = _streamDecoders.Find(_streamDecoder)?.Next ?? _streamDecoders.First;
-            while (node != null && node.Value.IsEndOfStream)
+            // look for the next unplayed decoder after our current decoder
+            LinkedListNode<IStreamDecoder> node;
+            if (_streamDecoder == null)
             {
-                node = node.Next;
+                // first stream...
+                node = _streamDecoders.First;
+            }
+            else
+            {
+                node = _streamDecoders.Find(_streamDecoder);
+                while (node != null && node.Value.IsEndOfStream)
+                {
+                    node = node.Next;
+                }
             }
 
             // clean up and remove the old decoder if we're not keeping it
@@ -115,7 +124,7 @@ namespace NAudio.Vorbis
                 _streamDecoder.Dispose();
             }
 
-            // if we don't have any valid decoders, try to find a new stream
+            // finally, if we still don't have a valid decoder, try to find a new stream in the container
             if (node == null && FindNextStream())
             {
                 node = _streamDecoders.Last;
@@ -290,18 +299,21 @@ namespace NAudio.Vorbis
         {
             if (_streamDecoder.IsEndOfStream)
             {
-                if (!_hasEnded)
+                if (_hasEnded)
                 {
-                    var eosea = new EndOfStreamEventArgs();
-                    EndOfStream?.Invoke(this, eosea);
-                    _hasEnded = true;
-                    if (eosea.AdvanceToNextStream)
+                    // we've ended and don't have any data, so just bail
+                    return 0;
+                }
+
+                var eosea = new EndOfStreamEventArgs();
+                EndOfStream?.Invoke(this, eosea);
+                _hasEnded = true;
+                if (eosea.AdvanceToNextStream)
+                {
+                    var formatChanged = GetNextDecoder(eosea.KeepStream);
+                    if (formatChanged ?? true)
                     {
-                        var formatChanged = GetNextDecoder(eosea.KeepStream);
-                        if (formatChanged ?? true)
-                        {
-                            return 0;
-                        }
+                        return 0;
                     }
                 }
             }
@@ -361,10 +373,11 @@ namespace NAudio.Vorbis
         {
             if (_containerReader?.CanSeek ?? false)
             {
-                var lastStream = _streamDecoders.Last.Value;
+                var lastStream = _streamDecoders.Last?.Value;
                 while (_containerReader.FindNextStream() && lastStream == _streamDecoders.Last.Value)
                 {
                 }
+                return _streamDecoders.Last != null && lastStream != _streamDecoders.Last.Value;
             }
             return false;
         }
