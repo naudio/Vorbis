@@ -38,7 +38,7 @@
 
   <ItemGroup>
     <PackageReference Include="NAudio" Version="1.10.0" />
-    <PackageReference Include="NVorbis" Version="0.10.0" />
+    <PackageReference Include="NVorbis" Version="0.10.1" />
   </ItemGroup>
 
 </Project>
