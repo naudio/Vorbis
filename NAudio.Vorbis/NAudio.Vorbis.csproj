@@ -4,7 +4,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <RootNamespace>NAudio.Vorbis</RootNamespace>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
     <Authors>Andrew Ward</Authors>
     <Company>Andrew Ward</Company>
     <Description>NAudio support for Vorbis</Description>
@@ -14,21 +14,16 @@
     <RepositoryUrl>https://github.com/naudio/Vorbis</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>audio c# .NET sound vorbis NAudio NVorbis</PackageTags>
-    <PackageReleaseNotes>- Update to NVorbis 0.10.1
-- Update to NAudio.Core 2.0.0
-</PackageReleaseNotes>
+    <PackageReleaseNotes>- Change license to MIT
+- Update to NVorbis v0.10.3</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.3.0.0</AssemblyVersion>
-    <FileVersion>1.3.0.0</FileVersion>
+    <AssemblyVersion>1.4.0.0</AssemblyVersion>
+    <FileVersion>1.4.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\LICENSE">
       <Pack>True</Pack>
-    </None>
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
     </None>
     <None Include="..\README.md">
       <Pack>True</Pack>
@@ -37,7 +32,7 @@
 
   <ItemGroup>
     <PackageReference Include="NAudio.Core" Version="2.0.0" />
-    <PackageReference Include="NVorbis" Version="0.10.1" />
+    <PackageReference Include="NVorbis" Version="0.10.3" />
   </ItemGroup>
 
 </Project>
