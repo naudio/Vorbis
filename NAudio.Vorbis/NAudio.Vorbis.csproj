@@ -4,27 +4,23 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <RootNamespace>NAudio.Vorbis</RootNamespace>
-    <Version>1.4.0</Version>
+    <Version>1.5.0</Version>
     <Authors>Andrew Ward</Authors>
     <Company>Andrew Ward</Company>
     <Description>NAudio support for Vorbis</Description>
-    <Copyright>Copyright © Andrew Ward 2020</Copyright>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Copyright>Copyright © Andrew Ward 2021</Copyright>
     <PackageProjectUrl>https://github.com/naudio/Vorbis</PackageProjectUrl>
     <RepositoryUrl>https://github.com/naudio/Vorbis</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>audio c# .NET sound vorbis NAudio NVorbis</PackageTags>
-    <PackageReleaseNotes>- Change license to MIT
-- Update to NVorbis v0.10.3</PackageReleaseNotes>
+    <PackageReleaseNotes>- Update to NVorbis v0.10.4 (Fixes seek issues)</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.4.0.0</AssemblyVersion>
-    <FileVersion>1.4.0.0</FileVersion>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
+    <FileVersion>1.5.0.0</FileVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-    </None>
     <None Include="..\README.md">
       <Pack>True</Pack>
     </None>
@@ -32,7 +28,7 @@
 
   <ItemGroup>
     <PackageReference Include="NAudio.Core" Version="2.0.0" />
-    <PackageReference Include="NVorbis" Version="0.10.3" />
+    <PackageReference Include="NVorbis" Version="0.10.4" />
   </ItemGroup>
 
 </Project>
