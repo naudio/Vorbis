@@ -291,11 +291,10 @@ namespace NAudio.Vorbis
         /// <summary>
         /// Reads decoded audio data from the current stream.
         /// </summary>
-        /// <param name="buffer">The buffer to write the data to.</param>
-        /// <param name="offset">The offset into <paramref name="buffer"/> to start writing data.</param>
-        /// <param name="count">The number of values to write.  This must be a multiple of <see cref="WaveFormat.Channels"/>.</param>
-        /// <returns>The number of values writte to <paramref name="buffer"/>.</returns>
-        public int Read(float[] buffer, int offset, int count)
+        /// <param name="buffer">The buffer to write the data to.  If its length is not a multiple of
+        /// <see cref="WaveFormat.Channels"/>, the trailing partial sample frame is not filled.</param>
+        /// <returns>The number of values written to <paramref name="buffer"/>.</returns>
+        public int Read(Span<float> buffer)
         {
             if (_streamDecoder.IsEndOfStream)
             {
@@ -318,8 +317,20 @@ namespace NAudio.Vorbis
                 }
             }
 
-            return _streamDecoder.Read(buffer, offset, count);
+            // the decoder requires whole sample frames, but callers are free to pass any length
+            var count = buffer.Length - buffer.Length % WaveFormat.Channels;
+
+            return _streamDecoder.Read(buffer, 0, count);
         }
+
+        /// <summary>
+        /// Reads decoded audio data from the current stream.
+        /// </summary>
+        /// <param name="buffer">The buffer to write the data to.</param>
+        /// <param name="offset">The offset into <paramref name="buffer"/> to start writing data.</param>
+        /// <param name="count">The number of values to write.  This must be a multiple of <see cref="WaveFormat.Channels"/>.</param>
+        /// <returns>The number of values written to <paramref name="buffer"/>.</returns>
+        public int Read(float[] buffer, int offset, int count) => Read(buffer.AsSpan(offset, count));
 
         /// <summary>
         /// Seeks the current stream to the sample position specified.

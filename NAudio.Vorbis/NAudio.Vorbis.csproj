@@ -2,33 +2,38 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net9.0</TargetFrameworks>
     <RootNamespace>NAudio.Vorbis</RootNamespace>
-    <Version>1.5.0</Version>
+    <Version>3.0.0</Version>
     <Authors>Andrew Ward</Authors>
     <Company>Andrew Ward</Company>
     <Description>NAudio support for Vorbis</Description>
-    <Copyright>Copyright © Andrew Ward 2021</Copyright>
+    <Copyright>Copyright © Andrew Ward 2026</Copyright>
     <PackageProjectUrl>https://github.com/naudio/Vorbis</PackageProjectUrl>
     <RepositoryUrl>https://github.com/naudio/Vorbis</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>audio c# .NET sound vorbis NAudio NVorbis</PackageTags>
-    <PackageReleaseNotes>- Update to NVorbis v0.10.4 (Fixes seek issues)</PackageReleaseNotes>
+    <PackageReleaseNotes>- Requires NAudio 3 and .NET 9 (for NAudio 2 / .NET Standard 2.0, stay on NAudio.Vorbis 1.5.0)
+- Read methods use the Span&lt;T&gt; signatures introduced in NAudio 3
+- Removed the obsolete IsParameterChange, ClearParameterChange and ContainerOverheadBits members
+- Update to NVorbis v0.10.5, which fixes VorbisWaveReader.Comments throwing an InvalidCastException</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.5.0.0</AssemblyVersion>
-    <FileVersion>1.5.0.0</FileVersion>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\README.md">
       <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NAudio.Core" Version="2.0.0" />
-    <PackageReference Include="NVorbis" Version="0.10.4" />
+    <PackageReference Include="NAudio.Core" Version="3.0.1" />
+    <PackageReference Include="NVorbis" Version="0.10.5" />
   </ItemGroup>
 
 </Project>
