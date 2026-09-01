@@ -31,6 +31,24 @@
          The matching <None Include> is in Directory.Build.targets. -->
     <PackageIcon>naudio-icon.png</PackageIcon>
 
+    <!-- Strong naming, matching NAudio and NLayer. The .snk lives at the repo root,
+         anchored via $(MSBuildThisFileDirectory) so csprojs at any depth resolve it.
+         The key is checked in: for OSS strong naming its private half is not a secret,
+         it only establishes assembly identity, and a key nobody can build with is worse
+         than no key at all. The test and sample projects inherit signing, which is
+         harmless.
+
+         Note this is new in 3.0: NAudio.Vorbis 1.5.0 and earlier were unsigned, so the
+         assembly identity changes. That is a break, but 3.0 already requires a new
+         target framework and a recompile against NAudio 3, so it costs nothing extra. -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)NAudioVorbisStrongNameKey.snk</AssemblyOriginatorKeyFile>
+    <!-- CS8002: NVorbis is not strong-named (no version of it is, including the 1.0
+         prereleases), so signing this assembly warns about the reference. .NET Framework
+         refused to load such a reference, but .NET Core and later dropped strong-name
+         verification entirely, so on net9.0 it is noise. NAudio.Core is signed. -->
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+
     <LangVersion>latest</LangVersion>
     <!-- 0 compiler warnings today, so this is free; keeps the build clean. -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

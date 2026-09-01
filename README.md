@@ -95,6 +95,19 @@ dotnet build -p:NVorbisVersion=1.0.0-rc.2
 The release workflow takes the same value, so preview packages on the NVorbis
 1.0 prerelease can be published without changing the repo default.
 
+## Strong naming
+
+The assembly is strong-named from 3.0 onwards, as NAudio and NLayer are; 1.5.0
+and earlier were not, so the assembly identity changes with this release. The
+key is checked in at the repo root: for open-source strong naming the private
+half is not a secret — it establishes assembly identity, it does not protect
+anything — and a key nobody can build with would be worse than none.
+
+NVorbis is not strong-named, in any version, so the build suppresses CS8002 for
+that reference. .NET Framework refused to load an unsigned reference from a
+signed assembly, but .NET Core and later dropped strong-name verification, so on
+`net9.0` it has no effect.
+
 ## Building
 
 ```
