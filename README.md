@@ -1,24 +1,127 @@
-NAudio.Vorbis    [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/naudio/Vorbis?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
--------
+# NAudio.Vorbis
 
-NAudio.Vorbis is a convenience wrapper to enable easy integration of [NVorbis](https://github.com/NVorbis/NVorbis) into NAudio projects.
+[![build](https://github.com/naudio/Vorbis/actions/workflows/build.yml/badge.svg)](https://github.com/naudio/Vorbis/actions/workflows/build.yml)
+[![NuGet](https://img.shields.io/nuget/v/NAudio.Vorbis.svg)](https://www.nuget.org/packages/NAudio.Vorbis/)
 
-Version 3.x requires NAudio 3 and .NET 9. If you are still on NAudio 2 or need .NET Standard 2.0, use NAudio.Vorbis 1.5.0.
+NAudio.Vorbis is a convenience wrapper that lets you play and read Ogg Vorbis
+files with [NAudio](https://github.com/naudio/NAudio), using
+[NVorbis](https://github.com/NVorbis/NVorbis) to do the decoding.
 
-To use:
+## Requirements
+
+| NAudio.Vorbis | Requires |
+| --- | --- |
+| 3.x | NAudio 3, .NET 9 |
+| 1.5.0 | NAudio 2, .NET Standard 2.0 |
+
+NAudio 3 dropped .NET Framework and .NET Standard 2.0 and changed the `Read`
+signatures on `IWaveProvider` and `ISampleProvider` to take a `Span<T>`, so
+NAudio.Vorbis 3.0 is a clean break. If you are still on NAudio 2, stay on
+NAudio.Vorbis 1.5.0.
+
+## Playing a file
+
+`VorbisWaveReader` is a `WaveStream`, so it plugs into any NAudio output device:
 
 ```cs
-// add a reference to NVorbis.dll
-// add a reference to NAudio.Vorbis.dll
+using NAudio.Vorbis;
+using NAudio.Wave;
 
-using (var vorbisStream = new NAudio.Vorbis.VorbisWaveReader("path/to/file.ogg"))
-using (var waveOut = new NAudio.Wave.WaveOut())
-{
-    waveOut.Init(vorbisStream);
-    waveOut.Play();
-   
-    // wait here until playback stops or should stop
-}
+using var reader = new VorbisWaveReader("path/to/file.ogg");
+using var player = new WasapiPlayerBuilder().Build();
+
+player.Init(reader);
+player.Play();
+
+// wait here until playback stops or should stop
 ```
 
-If you have any questions or comments, feel free to join us on Gitter.  If you have any issues or feature requests, please submit them in the issue tracker.
+`WasapiPlayer` comes from the `NAudio.Wasapi` package. Any other NAudio output
+works the same way — `WaveOut` from `NAudio.WinMM`, or `AlsaOut` from
+`NAudio.Alsa` on Linux.
+
+## Reading samples
+
+`VorbisWaveReader` also implements `ISampleProvider`, so it drops straight into
+a sample pipeline:
+
+```cs
+using NAudio.Wave.SampleProviders;
+
+using var reader = new VorbisWaveReader("path/to/file.ogg");
+var mixer = new MixingSampleProvider(new[] { (ISampleProvider)reader });
+```
+
+Or convert to a WAV file:
+
+```cs
+using var reader = new VorbisWaveReader("path/to/file.ogg");
+WaveFileWriter.CreateWaveFile("output.wav", reader);
+```
+
+`VorbisSampleProvider` is the layer underneath, and exposes the things
+`VorbisWaveReader` deliberately hides — the end-of-stream event, and switching
+between the logical streams of a chained file.
+
+## Seeking
+
+`VorbisWaveReader` supports seeking when the underlying stream does. Positions
+are in bytes and should be a multiple of `WaveFormat.BlockAlign`:
+
+```cs
+reader.CurrentTime = TimeSpan.FromSeconds(30);
+```
+
+A source that cannot seek (a network or pipe stream) still decodes; only
+`Position` and `Length` are unavailable.
+
+## Known NVorbis limitations
+
+Decoding is NVorbis's job, and the current stable release (0.10.5) has bugs we
+cannot work around from here. All three are fixed in the NVorbis 1.0.0 line,
+which is still a prerelease — a stable package should not depend on one, so
+releases stay on 0.10.5 until NVorbis 1.0 ships.
+
+ * **Seeking into the final page can throw** `InvalidDataException: GranulePos mismatch` when the last page's granule position does not line up with the packets on it — the ordinary shape of an encoder's trailing partial page (NVorbis#39)
+ * **Seeking back to the start does not always land on the first sample.** The position reads back as 0, but decoding can resume elsewhere in the file
+ * **A forward-only source can still hang** on a file whose granule positions understate its contents. For seekable sources this is handled — reads are clamped to what the stream has left — but with no length to clamp to there is nothing to be done here (NVorbis#40, [#16](https://github.com/naudio/Vorbis/issues/16))
+
+To try a build against the NVorbis 1.0 prerelease:
+
+```
+dotnet build -p:NVorbisVersion=1.0.0-rc.2
+```
+
+The release workflow takes the same value, so preview packages on the NVorbis
+1.0 prerelease can be published without changing the repo default.
+
+## Building
+
+```
+dotnet build NAudio.Vorbis.sln
+dotnet test NAudio.Vorbis.sln
+```
+
+`TestApp` is a WinForms harness (Windows only) for playing a file by hand and
+dragging a position bar around, which is the most practical way to exercise
+seeking. It reports failed seeks in its status line rather than crashing, so
+you can see which files misbehave.
+
+The test corpus in `NAudio.Vorbis.Tests/TestFiles` is generated from synthesised
+tones rather than taken from any recording; `NAudio.Vorbis.Tests/tools` has the
+script that regenerates it.
+
+## Releasing
+
+`build.yml` builds and tests every push and pull request, and separately builds
+against the NVorbis 1.0 prerelease. `release.yml` publishes to NuGet:
+
+ * **Final release** — set `VersionPrefix` in `Directory.Build.props`, rename the `### Unreleased` section of `RELEASE_NOTES.md` to `### <version> (date)`, then push a matching `v*` tag. The workflow refuses to cut a final release against a prerelease NVorbis
+ * **Preview** — run the workflow manually from `master`. It publishes `<VersionPrefix>-preview.<run number>`, or the label you pass in `milestone`. Pass `nvorbis_version` to build the preview against a different NVorbis
+
+Publishing uses NuGet trusted publishing (OIDC), so there is no API key to
+rotate; the `NUGET_USER` repository variable names the NuGet.org account.
+
+## Licence
+
+MIT.

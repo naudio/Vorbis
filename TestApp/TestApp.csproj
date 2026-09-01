@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <!-- So the app still builds (not runs) on a non-Windows machine, which
+         keeps `dotnet build NAudio.Vorbis.sln` working for contributors on
+         Linux and macOS. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <!-- Run on whatever recent runtime is installed rather than requiring
+         exactly .NET 9. -->
+    <RollForward>LatestMajor</RollForward>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio.Wasapi" Version="3.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NAudio.Vorbis\NAudio.Vorbis.csproj" />
+  </ItemGroup>
+
+</Project>
