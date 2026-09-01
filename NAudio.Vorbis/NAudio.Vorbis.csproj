@@ -16,7 +16,8 @@
     <PackageReleaseNotes>- Requires NAudio 3 and .NET 9 (for NAudio 2 / .NET Standard 2.0, stay on NAudio.Vorbis 1.5.0)
 - Read methods use the Span&lt;T&gt; signatures introduced in NAudio 3
 - Removed the obsolete IsParameterChange, ClearParameterChange and ContainerOverheadBits members
-- Update to NVorbis v0.10.5, which fixes VorbisWaveReader.Comments throwing an InvalidCastException</PackageReleaseNotes>
+- Update to NVorbis v0.10.5, which fixes VorbisWaveReader.Comments throwing an InvalidCastException
+- Fixed a hang decoding files whose final read runs past the end of the stream</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyVersion>3.0.0.0</AssemblyVersion>
     <FileVersion>3.0.0.0</FileVersion>
