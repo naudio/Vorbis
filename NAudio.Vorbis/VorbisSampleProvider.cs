@@ -14,6 +14,7 @@ namespace NAudio.Vorbis
         private IStreamDecoder _streamDecoder;
         private readonly LinkedList<IStreamDecoder> _streamDecoders = new LinkedList<IStreamDecoder>();
         private bool _hasEnded;
+        private bool _totalSamplesUnavailable;
 
         /// <summary>
         /// Gets the number of streams currently known by this instance.
@@ -319,6 +320,26 @@ namespace NAudio.Vorbis
 
             // the decoder requires whole sample frames, but callers are free to pass any length
             var count = buffer.Length - buffer.Length % WaveFormat.Channels;
+
+            // Never ask the decoder for more than the stream has left to give.  Over-reading past the
+            // end can leave NVorbis's decode state with a negative valid length, and its Read loop then
+            // spins forever without making progress (naudio/Vorbis#16, NVorbis#40).  TotalSamples is
+            // only knowable when the container can seek, which is also the condition NVorbis's own fix
+            // for this uses, so forward-only streams are left alone.
+            if (CanSeek && !_totalSamplesUnavailable)
+            {
+                try
+                {
+                    var remaining = (_streamDecoder.TotalSamples - _streamDecoder.SamplePosition) * WaveFormat.Channels;
+                    if (remaining < count) count = (int)Math.Max(remaining, 0);
+                }
+                catch (NotSupportedException)
+                {
+                    // constructed with allowSeek: true over a source that can't actually seek, so the
+                    // decoder can't report a total; stop asking and read unclamped as before
+                    _totalSamplesUnavailable = true;
+                }
+            }
 
             return _streamDecoder.Read(buffer, 0, count);
         }
