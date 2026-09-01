@@ -252,6 +252,7 @@ namespace NAudio.Vorbis
         /// Creates a new instance of <see cref="VorbisSampleProvider"/>.
         /// </summary>
         /// <param name="sourceStream">The stream to read for data.</param>
+        /// <param name="closeOnDispose"><see langword="true"/> to close <paramref name="sourceStream"/> when this instance is disposed.</param>
         public VorbisSampleProvider(System.IO.Stream sourceStream, bool closeOnDispose = false)
         {
             _containerReader = new NVorbis.Ogg.ContainerReader(sourceStream, closeOnDispose)
@@ -341,7 +342,12 @@ namespace NAudio.Vorbis
                 }
             }
 
+            // NVorbis 0.10.x only offers the (buffer, offset, count) overload; the 1.0 line adds
+            // Read(Span<float>) and marks this one obsolete.  Keep calling it so one source tree
+            // builds against both, and suppress the obsoletion warning a 1.0 preview build raises.
+#pragma warning disable CS0618 // Type or member is obsolete
             return _streamDecoder.Read(buffer, 0, count);
+#pragma warning restore CS0618
         }
 
         /// <summary>

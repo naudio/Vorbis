@@ -5,16 +5,42 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAudio.Vorbis", "NAudio.Vorbis\NAudio.Vorbis.csproj", "{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAudio.Vorbis.Tests", "NAudio.Vorbis.Tests\NAudio.Vorbis.Tests.csproj", "{31F3A405-C787-4838-80DD-931FA99A3A6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}.Debug|x64.Build.0 = Debug|Any CPU
+		{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}.Debug|x86.Build.0 = Debug|Any CPU
 		{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}.Release|x64.ActiveCfg = Release|Any CPU
+		{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}.Release|x64.Build.0 = Release|Any CPU
+		{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}.Release|x86.ActiveCfg = Release|Any CPU
+		{6FC9AAA7-E7FE-4BD4-B813-582D4B3BDA0C}.Release|x86.Build.0 = Release|Any CPU
+		{31F3A405-C787-4838-80DD-931FA99A3A6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31F3A405-C787-4838-80DD-931FA99A3A6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31F3A405-C787-4838-80DD-931FA99A3A6D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{31F3A405-C787-4838-80DD-931FA99A3A6D}.Debug|x64.Build.0 = Debug|Any CPU
+		{31F3A405-C787-4838-80DD-931FA99A3A6D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{31F3A405-C787-4838-80DD-931FA99A3A6D}.Debug|x86.Build.0 = Debug|Any CPU
+		{31F3A405-C787-4838-80DD-931FA99A3A6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31F3A405-C787-4838-80DD-931FA99A3A6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31F3A405-C787-4838-80DD-931FA99A3A6D}.Release|x64.ActiveCfg = Release|Any CPU
+		{31F3A405-C787-4838-80DD-931FA99A3A6D}.Release|x64.Build.0 = Release|Any CPU
+		{31F3A405-C787-4838-80DD-931FA99A3A6D}.Release|x86.ActiveCfg = Release|Any CPU
+		{31F3A405-C787-4838-80DD-931FA99A3A6D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
