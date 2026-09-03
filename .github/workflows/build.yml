@@ -22,14 +22,14 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore
-        run: dotnet restore NAudio.Vorbis.sln
+        run: dotnet restore NAudio.Vorbis.slnx
 
       - name: Build
-        run: dotnet build NAudio.Vorbis.sln --configuration Release --no-restore
+        run: dotnet build NAudio.Vorbis.slnx --configuration Release --no-restore
 
       - name: Test
         run: >
-          dotnet test NAudio.Vorbis.sln
+          dotnet test NAudio.Vorbis.slnx
           --configuration Release
           --no-build
           --logger trx
@@ -62,4 +62,4 @@ jobs:
 
       - name: Build and test against the NVorbis 1.0 prerelease
         run: |
-          dotnet test NAudio.Vorbis.sln --configuration Release -p:NVorbisVersion=1.0.0-rc.2
+          dotnet test NAudio.Vorbis.slnx --configuration Release -p:NVorbisVersion=1.0.0-rc.2

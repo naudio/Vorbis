@@ -111,9 +111,12 @@ signed assembly, but .NET Core and later dropped strong-name verification, so on
 ## Building
 
 ```
-dotnet build NAudio.Vorbis.sln
-dotnet test NAudio.Vorbis.sln
+dotnet build NAudio.Vorbis.slnx
+dotnet test NAudio.Vorbis.slnx
 ```
+
+The solution is in the XML `.slnx` format, so it needs the .NET 9.0.200 SDK or
+later; `global.json` pins that floor and rolls forward to newer SDKs.
 
 `TestApp` is a WinForms harness (Windows only) for playing a file by hand and
 dragging a position bar around, which is the most practical way to exercise

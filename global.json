@@ -1,0 +1,9 @@
+{
+  // Solution files here are .slnx, which the SDK only understands from 9.0.200
+  // onwards. Pinning the floor turns an older SDK into a clear error instead of a
+  // confusing one; latestMajor so .NET 10 and later SDKs are fine too.
+  "sdk": {
+    "version": "9.0.200",
+    "rollForward": "latestMajor"
+  }
+}

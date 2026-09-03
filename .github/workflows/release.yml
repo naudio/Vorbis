@@ -165,13 +165,13 @@ jobs:
           }
 
       - name: Restore
-        run: dotnet restore NAudio.Vorbis.sln ${{ steps.version.outputs.pack_args }}
+        run: dotnet restore NAudio.Vorbis.slnx ${{ steps.version.outputs.pack_args }}
 
       - name: Build
-        run: dotnet build NAudio.Vorbis.sln --configuration Release --no-restore ${{ steps.version.outputs.pack_args }}
+        run: dotnet build NAudio.Vorbis.slnx --configuration Release --no-restore ${{ steps.version.outputs.pack_args }}
 
       - name: Test
-        run: dotnet test NAudio.Vorbis.sln --configuration Release --no-build
+        run: dotnet test NAudio.Vorbis.slnx --configuration Release --no-build
 
       # Pack the library explicitly so we never ship the TestApp sample or the
       # test project (both IsPackable=false anyway).
