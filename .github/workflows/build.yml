@@ -1,0 +1,65 @@
+name: build
+
+# Build & test on every PR, every push to master, and on demand.
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    # windows-latest so the net9.0-windows TestApp (WinForms) builds too.
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore
+        run: dotnet restore NAudio.Vorbis.slnx
+
+      - name: Build
+        run: dotnet build NAudio.Vorbis.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: >
+          dotnet test NAudio.Vorbis.slnx
+          --configuration Release
+          --no-build
+          --logger trx
+          --results-directory ${{ runner.temp }}/TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ${{ runner.temp }}/TestResults/*.trx
+          if-no-files-found: warn
+
+  # The 1.0.0 line of NVorbis fixes decoder bugs that still affect us on the
+  # stable 0.10.5 (see "Known NVorbis limitations" in the README), so we keep
+  # a build honest against it. Allowed to fail: it tracks a prerelease we do
+  # not ship, and it should not gate a PR when NVorbis publishes a new rc.
+  build-against-nvorbis-preview:
+    runs-on: windows-latest
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Build and test against the NVorbis 1.0 prerelease
+        run: |
+          dotnet test NAudio.Vorbis.slnx --configuration Release -p:NVorbisVersion=1.0.0-rc.2

@@ -1,0 +1,27 @@
+<Project>
+  <!--
+    Include the repo-root README and the shared icon in the NuGet package.
+    Both are anchored to the repo root via $(MSBuildThisFileDirectory) so they
+    resolve from any csproj depth. The test and sample projects set
+    <IsPackable>false</IsPackable>, so this include is inert for them.
+  -->
+  <ItemGroup Condition="'$(IsPackable)' != 'false'">
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)naudio-icon.png" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+
+  <!--
+    If PackageReleaseNotesFile is supplied (the release workflow passes
+    -p:PackageReleaseNotesFile=<path>), load its contents into
+    PackageReleaseNotes so NuGet shows them on the package page. No-op when
+    the property is unset or the file is missing, so a plain local
+    `dotnet pack` keeps working with no extra setup.
+  -->
+  <Target Name="LoadPackageReleaseNotesFromFile"
+          BeforeTargets="GenerateNuspec"
+          Condition="'$(PackageReleaseNotesFile)' != '' and Exists('$(PackageReleaseNotesFile)')">
+    <PropertyGroup>
+      <PackageReleaseNotes>$([System.IO.File]::ReadAllText('$(PackageReleaseNotesFile)'))</PackageReleaseNotes>
+    </PropertyGroup>
+  </Target>
+</Project>

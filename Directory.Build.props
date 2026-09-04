@@ -1,0 +1,67 @@
+<Project>
+  <PropertyGroup>
+    <!-- Version for the NAudio.Vorbis package. CI overrides <VersionSuffix> on
+         pre-release builds (e.g. preview.NN). The test and sample apps set
+         <IsPackable>false</IsPackable> and are never published. -->
+    <VersionPrefix>3.0.0</VersionPrefix>
+
+    <!-- The NVorbis version the package is built against, overridable from the
+         command line so a preview can be cut against a newer NVorbis without
+         editing the repo:
+
+             dotnet build -p:NVorbisVersion=1.0.0-rc.2
+
+         The 1.0.0 line fixes several decoder bugs that still affect us on
+         0.10.5 - see "Known NVorbis limitations" in the README. Releases stay
+         on the stable 0.10.5 until 1.0.0 ships, because a stable package
+         should not carry a prerelease dependency (NuGet NU5104). -->
+    <NVorbisVersion Condition="'$(NVorbisVersion)' == ''">0.10.5</NVorbisVersion>
+
+    <!-- Common NuGet package metadata. The packable csproj adds its own
+         Description and PackageTags. -->
+    <Authors>Andrew Ward, Mark Heath</Authors>
+    <Copyright>© Andrew Ward 2026</Copyright>
+    <PackageProjectUrl>https://github.com/naudio/Vorbis</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/naudio/Vorbis</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!-- Shared NAudio-family package icon, anchored to the repo root via
+         $(MSBuildThisFileDirectory) so it resolves from any csproj depth.
+         The matching <None Include> is in Directory.Build.targets. -->
+    <PackageIcon>naudio-icon.png</PackageIcon>
+
+    <!-- Strong naming, matching NAudio and NLayer. The .snk lives at the repo root,
+         anchored via $(MSBuildThisFileDirectory) so csprojs at any depth resolve it.
+         The key is checked in: for OSS strong naming its private half is not a secret,
+         it only establishes assembly identity, and a key nobody can build with is worse
+         than no key at all. The test and sample projects inherit signing, which is
+         harmless.
+
+         Note this is new in 3.0: NAudio.Vorbis 1.5.0 and earlier were unsigned, so the
+         assembly identity changes. That is a break, but 3.0 already requires a new
+         target framework and a recompile against NAudio 3, so it costs nothing extra. -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)NAudioVorbisStrongNameKey.snk</AssemblyOriginatorKeyFile>
+    <!-- CS8002: NVorbis is not strong-named (no version of it is, including the 1.0
+         prereleases), so signing this assembly warns about the reference. .NET Framework
+         refused to load such a reference, but .NET Core and later dropped strong-name
+         verification entirely, so on net9.0 it is noise. NAudio.Core is signed. -->
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+
+    <LangVersion>latest</LangVersion>
+    <!-- 0 compiler warnings today, so this is free; keeps the build clean. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!-- SourceLink + symbol packages + reproducible CI builds. .NET 8+ ships
+         SourceLink in the SDK; PublishRepositoryUrl=true activates it for
+         GitHub-hosted repos without any PackageReference. Symbol packages
+         (.snupkg) sit next to the .nupkg and are pushed alongside it
+         automatically by `dotnet nuget push`. -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+</Project>

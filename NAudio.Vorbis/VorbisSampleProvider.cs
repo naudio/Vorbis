@@ -14,6 +14,7 @@ namespace NAudio.Vorbis
         private IStreamDecoder _streamDecoder;
         private readonly LinkedList<IStreamDecoder> _streamDecoders = new LinkedList<IStreamDecoder>();
         private bool _hasEnded;
+        private bool _totalSamplesUnavailable;
 
         /// <summary>
         /// Gets the number of streams currently known by this instance.
@@ -251,6 +252,7 @@ namespace NAudio.Vorbis
         /// Creates a new instance of <see cref="VorbisSampleProvider"/>.
         /// </summary>
         /// <param name="sourceStream">The stream to read for data.</param>
+        /// <param name="closeOnDispose"><see langword="true"/> to close <paramref name="sourceStream"/> when this instance is disposed.</param>
         public VorbisSampleProvider(System.IO.Stream sourceStream, bool closeOnDispose = false)
         {
             _containerReader = new NVorbis.Ogg.ContainerReader(sourceStream, closeOnDispose)
@@ -291,11 +293,10 @@ namespace NAudio.Vorbis
         /// <summary>
         /// Reads decoded audio data from the current stream.
         /// </summary>
-        /// <param name="buffer">The buffer to write the data to.</param>
-        /// <param name="offset">The offset into <paramref name="buffer"/> to start writing data.</param>
-        /// <param name="count">The number of values to write.  This must be a multiple of <see cref="WaveFormat.Channels"/>.</param>
-        /// <returns>The number of values writte to <paramref name="buffer"/>.</returns>
-        public int Read(float[] buffer, int offset, int count)
+        /// <param name="buffer">The buffer to write the data to.  If its length is not a multiple of
+        /// <see cref="WaveFormat.Channels"/>, the trailing partial sample frame is not filled.</param>
+        /// <returns>The number of values written to <paramref name="buffer"/>.</returns>
+        public int Read(Span<float> buffer)
         {
             if (_streamDecoder.IsEndOfStream)
             {
@@ -318,8 +319,45 @@ namespace NAudio.Vorbis
                 }
             }
 
-            return _streamDecoder.Read(buffer, offset, count);
+            // the decoder requires whole sample frames, but callers are free to pass any length
+            var count = buffer.Length - buffer.Length % WaveFormat.Channels;
+
+            // Never ask the decoder for more than the stream has left to give.  Over-reading past the
+            // end can leave NVorbis's decode state with a negative valid length, and its Read loop then
+            // spins forever without making progress (naudio/Vorbis#16, NVorbis#40).  TotalSamples is
+            // only knowable when the container can seek, which is also the condition NVorbis's own fix
+            // for this uses, so forward-only streams are left alone.
+            if (CanSeek && !_totalSamplesUnavailable)
+            {
+                try
+                {
+                    var remaining = (_streamDecoder.TotalSamples - _streamDecoder.SamplePosition) * WaveFormat.Channels;
+                    if (remaining < count) count = (int)Math.Max(remaining, 0);
+                }
+                catch (NotSupportedException)
+                {
+                    // constructed with allowSeek: true over a source that can't actually seek, so the
+                    // decoder can't report a total; stop asking and read unclamped as before
+                    _totalSamplesUnavailable = true;
+                }
+            }
+
+            // NVorbis 0.10.x only offers the (buffer, offset, count) overload; the 1.0 line adds
+            // Read(Span<float>) and marks this one obsolete.  Keep calling it so one source tree
+            // builds against both, and suppress the obsoletion warning a 1.0 preview build raises.
+#pragma warning disable CS0618 // Type or member is obsolete
+            return _streamDecoder.Read(buffer, 0, count);
+#pragma warning restore CS0618
         }
+
+        /// <summary>
+        /// Reads decoded audio data from the current stream.
+        /// </summary>
+        /// <param name="buffer">The buffer to write the data to.</param>
+        /// <param name="offset">The offset into <paramref name="buffer"/> to start writing data.</param>
+        /// <param name="count">The number of values to write.  This must be a multiple of <see cref="WaveFormat.Channels"/>.</param>
+        /// <returns>The number of values written to <paramref name="buffer"/>.</returns>
+        public int Read(float[] buffer, int offset, int count) => Read(buffer.AsSpan(offset, count));
 
         /// <summary>
         /// Seeks the current stream to the sample position specified.

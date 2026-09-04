@@ -1,34 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>NAudio.Vorbis</RootNamespace>
-    <Version>1.5.0</Version>
-    <Authors>Andrew Ward</Authors>
-    <Company>Andrew Ward</Company>
     <Description>NAudio support for Vorbis</Description>
-    <Copyright>Copyright © Andrew Ward 2021</Copyright>
-    <PackageProjectUrl>https://github.com/naudio/Vorbis</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/naudio/Vorbis</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageTags>audio c# .NET sound vorbis NAudio NVorbis</PackageTags>
-    <PackageReleaseNotes>- Update to NVorbis v0.10.4 (Fixes seek issues)</PackageReleaseNotes>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.5.0.0</AssemblyVersion>
-    <FileVersion>1.5.0.0</FileVersion>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="NAudio.Core" Version="2.0.0" />
-    <PackageReference Include="NVorbis" Version="0.10.4" />
+    <PackageReference Include="NAudio.Core" Version="3.0.1" />
+    <PackageReference Include="NVorbis" Version="$(NVorbisVersion)" />
   </ItemGroup>
 
 </Project>
